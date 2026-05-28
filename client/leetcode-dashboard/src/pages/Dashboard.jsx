@@ -1,0 +1,214 @@
+import { useEffect, useState } from "react";
+
+import { fetchUser } from "../services/api";
+
+import { StatsChart } from "../components/StatsChart";
+import { ContestData } from "../components/Contests";
+import { RecentActivity } from "../components/RecentActivity";
+import { TagProblemCounts } from "../components/TagProblemCounts";
+import { Languages } from "../components/Languages";
+import { AIInsights } from "../components/AIInsights";
+
+export default function Dashboard() {
+  const [data, setData] = useState(null);
+
+  const [username, setUsername] =
+    useState("71RExtm4lC");
+
+  const [insights, setInsights] =
+    useState(null);
+
+  const [loadingInsights, setLoadingInsights] =
+    useState(false);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const res = await fetchUser(username);
+
+      setData(res.data);
+
+      // reset old insights when new user searched
+      setInsights(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchInsights = async () => {
+    try {
+      setLoadingInsights(true);
+
+      const response = await fetch(
+        "http://localhost:5000/insights",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            profileData: data,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      setInsights(result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingInsights(false);
+    }
+  };
+
+  if (!data) {
+    return (
+      <div className="p-10 text-xl">
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+
+      <div className="max-w-7xl mx-auto">
+
+        {/* Search Bar */}
+        <div className="flex gap-2 mb-8">
+          <input
+            value={username}
+            onChange={(e) =>
+              setUsername(e.target.value)
+            }
+            className="border px-4 py-3 rounded-xl w-full shadow-sm"
+            placeholder="Enter LeetCode username"
+          />
+
+          <button
+            onClick={loadUser}
+            className="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition"
+          >
+            Search
+          </button>
+        </div>
+
+        {/* Profile Card */}
+        <div className="bg-white rounded-3xl shadow-lg p-8">
+
+          <div className="flex flex-col md:flex-row items-center gap-6">
+
+            <img
+              src={
+                data.profile.profile.userAvatar
+              }
+              alt="avatar"
+              className="w-28 h-28 rounded-full border-4 border-gray-200"
+            />
+
+            <div>
+              <h1 className="text-4xl font-bold">
+                {data.profile.username}
+              </h1>
+
+              <p className="text-gray-500 mt-2">
+                Rank #
+                {
+                  data.profile.profile
+                    .ranking
+                }
+              </p>
+
+              <p className="text-gray-500">
+                {
+                  data.profile.profile
+                    .countryName
+                }
+              </p>
+
+              <p className="text-gray-500">
+                {
+                  data.profile.profile.school
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Dashboard Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h2 className="text-2xl font-bold mb-4">
+              Problem Stats
+            </h2>
+
+            <StatsChart data={data} />
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h2 className="text-2xl font-bold mb-4">
+              Contest Data
+            </h2>
+
+            <ContestData data={data} />
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h2 className="text-2xl font-bold mb-4">
+              Recent Activity
+            </h2>
+
+            <RecentActivity data={data} />
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h2 className="text-2xl font-bold mb-4">
+              Languages
+            </h2>
+
+            <Languages data={data} />
+          </div>
+
+        </div>
+
+        {/* Tag Counts */}
+        <div className="bg-white rounded-2xl shadow p-6 mt-8">
+          <h2 className="text-2xl font-bold mb-4">
+            Topic Coverage
+          </h2>
+
+          <TagProblemCounts data={data} />
+        </div>
+
+        {/* AI Insights Button */}
+        <div className="flex justify-center mt-10">
+          <button
+            onClick={fetchInsights}
+            disabled={loadingInsights}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-8 py-4 rounded-2xl text-lg font-semibold transition"
+          >
+            {loadingInsights
+              ? "Analyzing..."
+              : "✨ Generate AI Insights"}
+          </button>
+        </div>
+
+        {/* AI Insights */}
+        {insights && (
+          <div className="mt-10">
+            <AIInsights insights={insights} />
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
