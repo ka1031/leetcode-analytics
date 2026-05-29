@@ -5,6 +5,14 @@ An AI-powered LeetCode profile dashboard built using React, Express, Tailwind CS
 This application fetches a user's LeetCode data using GraphQL, visualizes statistics, and generates intelligent AI-based insights about problem-solving patterns, weaknesses, strengths, and growth opportunities.
 
 ---
+🌐 Live Demo
+Frontend
+
+https://leetcode-analytics-three.vercel.app/
+
+Backend
+
+https://leetcode-analytics-backend.onrender.com
 
 # ✨ Features
 
