@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { fetchUser } from "../services/api";
+import { fetchUser, fetchInsights } from "../services/api";
 
 import { StatsChart } from "../components/StatsChart";
 import { ContestData } from "../components/Contests";
@@ -43,31 +43,17 @@ export default function Dashboard() {
   };
 
 
-  const fetchInsights = async () => {
+  const generateInsights = async () => {
     try {
       setLoadingInsights(true);
 
-      const response = await fetch(
-        "http://localhost:5000/insights",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            profileData: data,
-          }),
-        }
-      );
-
-      const result = await response.json();
+      const result = await fetchInsights(data);
 
       setInsights(result);
+
     } catch (error) {
       console.error(error);
+
     } finally {
       setLoadingInsights(false);
     }
@@ -190,7 +176,7 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-white rounded-2xl shadow p-6">
-            
+
 
             <RecentActivity data={data} />
           </div>
@@ -215,7 +201,7 @@ export default function Dashboard() {
 
         <div className="flex justify-center mt-10">
           <button
-            onClick={fetchInsights}
+            onClick={generateInsights}
             disabled={loadingInsights}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-8 py-4 rounded-2xl text-lg font-semibold transition"
           >
