@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { fetchUser, fetchInsights } from "../services/api";
+import { fetchUser, fetchInsights, fetchCard } from "../services/api";
 
 import { StatsChart } from "../components/StatsChart";
 import { ContestData } from "../components/Contests";
@@ -8,6 +8,7 @@ import { RecentActivity } from "../components/RecentActivity";
 import { TagProblemCounts } from "../components/TagProblemCounts";
 import { Languages } from "../components/Languages";
 import { AIInsights } from "../components/AIInsights";
+import { PlayerCard } from "../components/PlayerCard";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -22,6 +23,11 @@ export default function Dashboard() {
   const [loadingInsights, setLoadingInsights] =
     useState(false);
 
+  const [card, setCard] = useState(null);
+
+  const [loadingCard, setLoadingCard] =
+    useState(false);
+
 
 
   const loadUser = async () => {
@@ -33,6 +39,7 @@ export default function Dashboard() {
       const res = await fetchUser(username);
       setData(res.data);
       setInsights(null);
+      setCard(null);
 
     } catch (err) {
       console.error(err);
@@ -56,6 +63,22 @@ export default function Dashboard() {
 
     } finally {
       setLoadingInsights(false);
+    }
+  };
+
+  const generateCard = async () => {
+    try {
+      setLoadingCard(true);
+
+      const result = await fetchCard(data);
+
+      setCard(result);
+
+    } catch (error) {
+      console.error(error);
+
+    } finally {
+      setLoadingCard(false);
     }
   };
 
@@ -199,7 +222,7 @@ export default function Dashboard() {
           <TagProblemCounts data={data} />
         </div>
 
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center gap-4 mt-10 flex-wrap">
           <button
             onClick={generateInsights}
             disabled={loadingInsights}
@@ -207,13 +230,29 @@ export default function Dashboard() {
           >
             {loadingInsights
               ? "Analyzing..."
-              : "✨ Generate AI Insights"}
+              : "Generate Tips"}
+          </button>
+
+          <button
+            onClick={generateCard}
+            disabled={loadingCard}
+            className="bg-amber-500 hover:bg-amber-600 disabled:bg-gray-400 text-white px-8 py-4 rounded-2xl text-lg font-semibold transition"
+          >
+            {loadingCard
+              ? "Building card..."
+              : "🃏 Generate Player Card"}
           </button>
         </div>
 
         {insights && (
           <div className="mt-10">
             <AIInsights insights={insights} />
+          </div>
+        )}
+
+        {card && (
+          <div className="mt-10">
+            <PlayerCard card={card} />
           </div>
         )}
 

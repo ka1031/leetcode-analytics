@@ -24,3 +24,14 @@ export const fetchInsights = async (
 
   return response.data;
 };
+
+export const fetchCard = async (profileData) => {
+  const response = await API.post(
+    "/card",
+    {
+      profileData,
+    }
+  );
+
+  return response.data;
+};

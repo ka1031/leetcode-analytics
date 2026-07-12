@@ -4,6 +4,7 @@ const cors = require("cors");
 
 const userRoutes = require("./routes/user");
 const insightsRoutes = require("./routes/insights");
+const cardRoutes = require("./routes/card");
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/user", userRoutes);
 app.use("/insights", insightsRoutes);
+app.use("/card", cardRoutes);
 
 
 const PORT = 5000;
